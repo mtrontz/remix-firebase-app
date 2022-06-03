@@ -6,7 +6,7 @@ if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set');
 }
 
-export const { getSession, commitSession, destroySession } = createFileSessionStorage({
+const { getSession, commitSession, destroySession } = createFileSessionStorage({
   dir: path.join(__dirname, '../../app/sessions'),
   cookie: {
     name: '__session',
@@ -14,3 +14,5 @@ export const { getSession, commitSession, destroySession } = createFileSessionSt
     sameSite: true,
   },
 });
+
+export { getSession as getFileSession, commitSession as commitFileSession, destroySession as destroyFileSession };

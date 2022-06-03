@@ -1,9 +1,14 @@
 import { readFileSync, writeFileSync } from 'fs';
-import path from 'path';
+import path, {resolve, isAbsolute} from 'path';
 import { json, redirect } from 'remix';
-import { AppError } from '~/util';
+import { useCallback, useState } from 'react';
+import type { AppError } from '~/utils';
 import type { Auth, AuthSession, AuthUser } from './auth-types';
+import {encrypt, decrypt} from "~/services/encryption.server"
 
+let getAbsolutePath = useCallback((path: string) => {
+  if (path && (isAbsolute(path)) === true) return path
+}, []);
 // location of users.json file relative to build path NOT app
 const usersFile = path.join(__dirname, '../../app/auth.server/users.json');
 
@@ -24,8 +29,9 @@ export class FileAuth implements Auth<AuthUser> {
 
   async createAccount(user: AuthUser, redirectTo: string): Promise<Response> {
     if (!this.exists(user)) {
-      user.id = UUID.generate();
-      this.users.push(user);
+      let id = user.id ?? UUID.generate();
+      let password = await encrypt(user.password);
+      this.users.push({id, password, ...user});
       writeFileSync(usersFile, JSON.stringify(this.users));
       if (redirectTo) {
         return redirect(redirectTo);
@@ -38,7 +44,7 @@ export class FileAuth implements Auth<AuthUser> {
         );
       }
     } else {
-      return json(
+      return json<AppError>(
         {
           status: 'error',
           errorCode: 'auth/signUp',
@@ -51,16 +57,16 @@ export class FileAuth implements Auth<AuthUser> {
     }
   }
 
-  async login(user: AuthUser): Promise<Response> {
+  async login(user: AuthUser, redirectTo?: string, sessionType?: "cookie" | "file"): Promise<Response> {
     if (this.exists(user)) {
       let match: AuthUser | undefined = this.users.find((u) => user.username === u.username);
 
-      if (match && match.password === user.password) {
+      if (match && typeof match.password === "string" && (await decrypt(match.password)) === user.password) {
         // stuff any required info into the user session
-        return this.session.createAuthSession({ id: match.id });
+        return this.session.createAuthSession({ id: match.id }, redirectTo, sessionType);
       }
     }
-    return json(
+    return json<AppError>(
       {
         status: 'error',
         errorCode: 'auth/login',
@@ -111,8 +117,8 @@ export class FileAuth implements Auth<AuthUser> {
     return this.session.destroyAuthSession(request, ['id'], redirectTo);
   }
 
-  async user(request: Request): Promise<AuthUser | null> {
-    const session = await this.session.getAuthSession(request);
+  async user(request: Request, sessionType?: "cookie" | "file"): Promise<AuthUser | null> {
+    const session = await this.session.getAuthSession(request, sessionType);
     const id = session.get('id');
     // let user: AuthUserType;
 

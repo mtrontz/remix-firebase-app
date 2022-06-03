@@ -7,24 +7,27 @@ export type AuthSession = {
   /**
    * Returns the current user session object
    * @param {Request} request the resource request
+   * @param {"cookie"|"file"} sessionType the session storage type used
    * @returns {Promise<Session>} Promise object that resolves a Session
    */
-  getAuthSession(request: Request): Promise<Session>;
+  getAuthSession(request: Request, sessionType?: "cookie"|"file"): Promise<Session>;
   /**
    * Creates the user session for authentication.
    * @param {object} data the object that represents the user data
    * @param {string} redirectTo the location to redirect to on success
+   * @param {"cookie"|"file"} sessionType the session storage type used
    * @returns {Promise<Response>} Promise object that resolves a Response
    */
-  createAuthSession(data: any, redirectTo?: string): Promise<Response>;
+  createAuthSession(data: any, redirectTo?: string, sessionType?: "cookie"|"file"): Promise<Response>;
   /**
    * Destroys or otherwise invalidates the user session.
    * @param {Request} request the resource request
    * @param {strin[] | string} keys the session keys to invalidate
    * @param {string} redirectTo the location to redirect to on success
+   * @param {"cookie"|"file"} sessionType the session storage type used
    * @returns {Promise<Response>} Promise object that resolves a Response
    */
-  destroyAuthSession(request: Request, keys: string[] | string, redirectTo?: string): Promise<Response>;
+  destroyAuthSession(request: Request, keys: string[] | string, redirectTo?: string, sessionType?: "cookie"|"file"): Promise<Response>;
 };
 
 /**
@@ -66,21 +69,21 @@ export interface Auth<User extends AuthUser> {
    * @param {string} redirectTo the location to redirect to on success
    * @returns {any} Typically a Promise object that resolves a Response
    */
-  createAccount(user: User, redirectTo?: string): any;
+  createAccount(user: User, redirectTo?: string): Promise<Response>;
   /**
    * Login in a user.
    * @param {User} user the user account details
    * @param {string} redirectTo the location to redirect to on success
    * @returns {any} Typically a Promise object that resolves a Response
    */
-  login(user: User, redirectTo?: string): any;
+  login(user: User, redirectTo?: string): Promise<Response>;
   /**
    * Logout a user.
    * @param {Request} request the resource request
    * @param {string} redirectTo the location to redirect to on success
    * @returns {any} Typically a Promise object that resolves a Response
    */
-  logout(request: Request, redirectTo?: string): any;
+  logout(request: Request, redirectTo?: string): Promise<Response>;
   /**
    * Determines if a user account already exists.
    * @param {User} user the user account details
@@ -95,11 +98,11 @@ export interface Auth<User extends AuthUser> {
    * @param {string} redirectTo where to redirect the user if the requirement fails
    * @returns {any} Typically a Promise object that resolves a Response
    */
-  requireUser(request: Request, role?: string | null, redirectTo?: string): any;
+  requireUser(request: Request, role?: string | null, redirectTo?: string): Promise<Response>;
   /**
    * Returns the currently authenticated user details
    * @param {Request} request the resource request
    * @returns {any} Return or resolve an AuthUserType object or null
    */
-  user(request: Request): any;
+  user(request: Request): Promise<User | null>;
 }

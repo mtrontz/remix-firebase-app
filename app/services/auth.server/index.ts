@@ -10,3 +10,4 @@ const auth: Auth<AuthUser> = new FirebaseAuth(authSession);
 // const auth: AuthInterface<AuthUserType> = new FileAuth(authSession);
 
 export { auth };
+export type { Auth, AuthUser };

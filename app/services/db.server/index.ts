@@ -1,4 +1,4 @@
-import type { DB } from '~/controllers.server';
+import type { DB } from '~/services/controllers.server';
 import { firestoreDb } from './firestore-db';
 
 /**

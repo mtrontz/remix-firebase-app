@@ -1,7 +1,7 @@
 import { db } from '~/firebase';
-import { DBResult } from '~/controllers.server';
+import { DBResult } from '~/services/controllers.server';
 import type { Firestore, OrderByDirection, Query, WhereFilterOp } from 'firebase-admin/firestore';
-import type { DB, QueryOptions, OrderByOptions } from '~/controllers.server';
+import type { DB, QueryOptions, OrderByOptions } from '~/services/controllers.server';
 
 export class FirestoreDB implements DB {
   constructor(private db: Firestore) {}

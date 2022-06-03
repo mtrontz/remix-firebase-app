@@ -1,11 +1,14 @@
 import { Form, Outlet, useLoaderData } from 'remix';
-import type { LoaderFunction } from 'remix';
-import { auth } from '~/auth.server';
-
-export let meta = () => {
+import type { LoaderFunction, MetaFunction } from 'remix';
+import { auth } from '~/services/auth.server';
+import type { AuthUser } from '~/services/auth.server';
+export let meta: MetaFunction = () => {
   return {
     title: 'Protected Page',
   };
+};
+interface LoaderData {
+  user?: AuthUser | null
 };
 
 export const loader: LoaderFunction = async ({ request }) => {

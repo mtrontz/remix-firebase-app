@@ -1,27 +1,33 @@
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 import { json, Form, useActionData, redirect } from 'remix';
-import { auth } from '~/auth.server';
-import type { ActionFunction, LoaderFunction } from 'remix';
-import type { AppError } from '~/util';
-import { users } from '~/controllers.server';
+import { auth } from '~/services/auth.server';
+import type { ActionFunction, LoaderFunction, MetaFunction } from 'remix';
+import type { AppError } from '~/utils';
+import { users } from '~/services/controllers.server';
 
-export let meta = () => {
+export let meta: MetaFunction = () => {
   return {
     title: 'Sign Up Page',
   };
 };
 
-export const action: ActionFunction = async ({ request }) => {
+type AppFormData = {
+  email: FormDataEntryValue | null;
+  password: FormDataEntryValue | null;
+  confirm: FormDataEntryValue | null;
+};
+
+export let action: ActionFunction = async ({ request }) => {
   try {
     const form = await request.formData();
 
     // TODO: implement proper form validation
-    const email: any = form.get('email');
-    const password: any = form.get('password');
-    const confirm: any = form.get('confirm');
+    const email: FormDataEntryValue | null = form.get('email');
+    const password: FormDataEntryValue | null = form.get('password');
+    const confirm: FormDataEntryValue | null = form.get('confirm');
 
     // TODO: form validation
-    if (!email || email.trim() === '') {
+    if (!email || email.toString().trim() === '') {
       return json<AppError>(
         {
           status: 'validationFailure',
@@ -32,7 +38,7 @@ export const action: ActionFunction = async ({ request }) => {
       );
     }
 
-    if (!password || !confirm || password.trim() === '' || password !== confirm) {
+    if (!password || !confirm || password.toString().trim() === '' || password.toString().trim() !== confirm.toString().trim()) {
       return json<AppError>(
         {
           status: 'validationFailure',
@@ -46,7 +52,7 @@ export const action: ActionFunction = async ({ request }) => {
     // TODO: CSRF check
 
     // Create the account
-    const res = await (await auth.createAccount({ username: email, password })).json();
+    const res = await (await auth.createAccount({ username: email.toString().trim(), password })).json();
     // Create the user in the database
     await users.create({ id: res.user.uid, role: 'guest', username: res.user.email, preferences: { theme: 'dark' } });
     // Redirect to the home/login page
@@ -64,7 +70,7 @@ export const action: ActionFunction = async ({ request }) => {
   }
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export let loader: LoaderFunction = async ({ request }) => {
   // redirect if already signed in
   if (await auth.user(request)) {
     return redirect('/');
@@ -72,8 +78,8 @@ export const loader: LoaderFunction = async ({ request }) => {
     return null;
   }
 };
-
-export default function Index() {
+interface IndexProps {};
+let Index: React.FC<IndexProps> = () => {
   const actionError = useActionData();
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -108,4 +114,6 @@ export default function Index() {
       </main>
     </div>
   );
-}
+};
+
+export default Index;

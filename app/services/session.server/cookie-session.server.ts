@@ -1,11 +1,13 @@
 import { createCookieSessionStorage } from 'remix';
+import {encrypt, decrypt, randomUUID, randomInt} from "~/services/encryption.server";
+import React, { useCallback } from "react";
 
-const sessionSecret = process.env.SESSION_SECRET;
+let sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
-  throw new Error('SESSION_SECRET must be set');
+   throw new Error('SESSION_SECRET must be set');
 }
 
-export const { getSession, commitSession, destroySession } = createCookieSessionStorage({
+const { getSession, commitSession, destroySession } = createCookieSessionStorage({
   cookie: {
     name: '__session',
     // normally you want this to be `secure: true`
@@ -19,3 +21,6 @@ export const { getSession, commitSession, destroySession } = createCookieSession
     httpOnly: true,
   },
 });
+
+export { getSession as getCookieSession, commitSession as commitCookieSession, destroySession as destroyCookieSession };
+

@@ -1,7 +1,7 @@
 import { DecodedIdToken } from 'firebase-admin/auth';
 import { json, redirect } from 'remix';
 import { auth, restApiSignInUrl } from '~/firebase';
-import { AppError } from '~/util';
+import { AppError } from '~/utils';
 import type { Auth, AuthSession, AuthUser } from './auth-types';
 
 /**
@@ -82,7 +82,7 @@ export class FirebaseAuth implements Auth<AuthUser> {
 
       // check for error
       if (credentials.error) {
-        return json(
+        return json<AppError>(
           {
             status: 'error',
             errorCode: 'auth/login',

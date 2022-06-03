@@ -1,6 +1,6 @@
 import { installGlobals } from '@remix-run/node';
-import { FirebaseAuth } from '~/auth.server/firebase-auth';
-import type { AuthSession } from '~/auth.server/auth-types';
+import { FirebaseAuth } from '~/services/auth.server/firebase-auth';
+import type { AuthSession } from '~/services/auth.server/auth-types';
 
 const testUserCredentials = {
   username: 'test@example.com',
